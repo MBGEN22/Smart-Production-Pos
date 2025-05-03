@@ -111,6 +111,7 @@
             this.kryptonButton5 = new ComponentFactory.Krypton.Toolkit.KryptonButton();
             this.label18 = new System.Windows.Forms.Label();
             this.txtSearch = new ComponentFactory.Krypton.Toolkit.KryptonTextBox();
+            this.kryptonButton4 = new ComponentFactory.Krypton.Toolkit.KryptonButton();
             this.panel20 = new System.Windows.Forms.Panel();
             this.flowLayoutPanel4 = new System.Windows.Forms.FlowLayoutPanel();
             this.panel9 = new System.Windows.Forms.Panel();
@@ -151,12 +152,12 @@
             this.kryptonButton19 = new ComponentFactory.Krypton.Toolkit.KryptonButton();
             this.kryptonButton11 = new ComponentFactory.Krypton.Toolkit.KryptonButton();
             this.kryptonButton2 = new ComponentFactory.Krypton.Toolkit.KryptonButton();
-            this.kryptonButton4 = new ComponentFactory.Krypton.Toolkit.KryptonButton();
             this.kryptonButton3 = new ComponentFactory.Krypton.Toolkit.KryptonButton();
             this.kryptonButton16 = new ComponentFactory.Krypton.Toolkit.KryptonButton();
             this.kryptonButton22 = new ComponentFactory.Krypton.Toolkit.KryptonButton();
             this.kryptonButton24 = new ComponentFactory.Krypton.Toolkit.KryptonButton();
             this.kryptonButton6 = new ComponentFactory.Krypton.Toolkit.KryptonButton();
+            this.kryptonButton25 = new ComponentFactory.Krypton.Toolkit.KryptonButton();
             this.kryptonButton8 = new ComponentFactory.Krypton.Toolkit.KryptonButton();
             this.panel18 = new Shade.Controls.Panel();
             this.LB_heures = new System.Windows.Forms.Label();
@@ -1417,6 +1418,7 @@
             this.panel13.Controls.Add(this.kryptonButton5);
             this.panel13.Controls.Add(this.label18);
             this.panel13.Controls.Add(this.txtSearch);
+            this.panel13.Controls.Add(this.kryptonButton4);
             this.panel13.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel13.EdgeColor = System.Drawing.Color.DarkGray;
             this.panel13.Location = new System.Drawing.Point(5, 5);
@@ -1490,6 +1492,20 @@
             this.txtSearch.StateCommon.Content.Font = new System.Drawing.Font("Cairo", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.txtSearch.TabIndex = 121;
             this.txtSearch.TextChanged += new System.EventHandler(this.kryptonTextBox2_TextChanged);
+            // 
+            // kryptonButton4
+            // 
+            this.kryptonButton4.Location = new System.Drawing.Point(155, 4);
+            this.kryptonButton4.Name = "kryptonButton4";
+            this.kryptonButton4.Size = new System.Drawing.Size(54, 38);
+            this.kryptonButton4.StateCommon.Back.Color1 = System.Drawing.SystemColors.Control;
+            this.kryptonButton4.StateCommon.Back.Color2 = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
+            this.kryptonButton4.StateCommon.Content.ShortText.Color1 = System.Drawing.Color.Black;
+            this.kryptonButton4.StateCommon.Content.ShortText.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.kryptonButton4.TabIndex = 118;
+            this.kryptonButton4.Values.Image = global::Smart_Production_Pos.Properties.Resources.keyboard;
+            this.kryptonButton4.Values.Text = "";
+            this.kryptonButton4.Click += new System.EventHandler(this.kryptonButton4_Click_1);
             // 
             // panel20
             // 
@@ -1885,12 +1901,12 @@
             this.panel19.Controls.Add(this.kryptonButton19);
             this.panel19.Controls.Add(this.kryptonButton11);
             this.panel19.Controls.Add(this.kryptonButton2);
-            this.panel19.Controls.Add(this.kryptonButton4);
             this.panel19.Controls.Add(this.kryptonButton3);
             this.panel19.Controls.Add(this.kryptonButton16);
             this.panel19.Controls.Add(this.kryptonButton22);
             this.panel19.Controls.Add(this.kryptonButton24);
             this.panel19.Controls.Add(this.kryptonButton6);
+            this.panel19.Controls.Add(this.kryptonButton25);
             this.panel19.Controls.Add(this.kryptonButton8);
             this.panel19.Controls.Add(this.dateTimetxt);
             this.panel19.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -1985,20 +2001,6 @@
             this.kryptonButton2.Values.Text = "+";
             this.kryptonButton2.Click += new System.EventHandler(this.kryptonButton2_Click);
             // 
-            // kryptonButton4
-            // 
-            this.kryptonButton4.Location = new System.Drawing.Point(5, 62);
-            this.kryptonButton4.Name = "kryptonButton4";
-            this.kryptonButton4.Size = new System.Drawing.Size(51, 50);
-            this.kryptonButton4.StateCommon.Back.Color1 = System.Drawing.SystemColors.Control;
-            this.kryptonButton4.StateCommon.Back.Color2 = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
-            this.kryptonButton4.StateCommon.Content.ShortText.Color1 = System.Drawing.Color.Black;
-            this.kryptonButton4.StateCommon.Content.ShortText.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.kryptonButton4.TabIndex = 118;
-            this.kryptonButton4.Values.Image = global::Smart_Production_Pos.Properties.Resources.keyboard;
-            this.kryptonButton4.Values.Text = "";
-            this.kryptonButton4.Click += new System.EventHandler(this.kryptonButton4_Click_1);
-            // 
             // kryptonButton3
             // 
             this.kryptonButton3.Location = new System.Drawing.Point(197, 118);
@@ -2056,11 +2058,21 @@
             this.kryptonButton6.Values.Text = "";
             this.kryptonButton6.Click += new System.EventHandler(this.kryptonButton21_Click);
             // 
+            // kryptonButton25
+            // 
+            this.kryptonButton25.Location = new System.Drawing.Point(62, 64);
+            this.kryptonButton25.Name = "kryptonButton25";
+            this.kryptonButton25.Size = new System.Drawing.Size(46, 48);
+            this.kryptonButton25.TabIndex = 4;
+            this.kryptonButton25.Values.Image = global::Smart_Production_Pos.Properties.Resources.dossier1;
+            this.kryptonButton25.Values.Text = "";
+            this.kryptonButton25.Click += new System.EventHandler(this.kءءrypnButton16_Click);
+            // 
             // kryptonButton8
             // 
-            this.kryptonButton8.Location = new System.Drawing.Point(60, 63);
+            this.kryptonButton8.Location = new System.Drawing.Point(4, 63);
             this.kryptonButton8.Name = "kryptonButton8";
-            this.kryptonButton8.Size = new System.Drawing.Size(50, 49);
+            this.kryptonButton8.Size = new System.Drawing.Size(52, 49);
             this.kryptonButton8.TabIndex = 4;
             this.kryptonButton8.Values.Image = global::Smart_Production_Pos.Properties.Resources.liste_a_puces;
             this.kryptonButton8.Values.Text = "";
@@ -2507,5 +2519,6 @@
         private System.Windows.Forms.DataGridViewImageColumn DgvREMISE;
         public ComponentFactory.Krypton.Toolkit.KryptonButton kryptonButton23;
         private System.Windows.Forms.Panel panel24;
+        public ComponentFactory.Krypton.Toolkit.KryptonButton kryptonButton25;
     }
 }

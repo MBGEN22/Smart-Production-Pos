@@ -561,7 +561,7 @@ namespace Smart_Production_Pos.PL.vente
 				//DELETE_VENTE
 				classDelete.DELETE_LIST_VENTE(txt_nmr_fctr.Text);
 				//DELETE_HISTORIQUE
-				classDelete.DELETE_HISTORIQUE_CLIENT_BY_ID_FCTR(txt_nmr_fctr.Text);
+				classDelete.DELETE_HISTORIQUE_CLIENT_BY_ID_FCTR(txt_nmr_fctr.Text, "سند جديد");
 				//DELETE_FACTURE_VENTE
 				classDelete.DELETE_FACTURE_VENTE(txt_nmr_fctr.Text);
 				//edit historique client

@@ -7,14 +7,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Smart_Production_Pos.PL.vente;
 
 namespace Smart_Production_Pos.PLADD.vente
 {
     public partial class frm_change_Price : Form
     {
         public frm_vente_caisse frmVente;
+        public frm_edit_bon frm_edit_bon;
         public string codebarre;
         public decimal price_min;
+        public string Typee;
         public frm_change_Price()
         {
             InitializeComponent();
@@ -31,26 +34,53 @@ namespace Smart_Production_Pos.PLADD.vente
                 }
                 else
                 {
-                    foreach (DataGridViewRow row in frmVente.dataGridView1.Rows)
+                    if (Typee == "edit")
                     {
-                        if (!row.IsNewRow)
+                        foreach (DataGridViewRow row in frm_edit_bon.dataGridView1.Rows)
                         {
-                            var cellValue = row.Cells["DgvCodeBarre"].Value;
-                            // Check if the cell value is not null before comparison
-                            if (cellValue != null && cellValue.ToString() == codebarre)
+                            if (!row.IsNewRow)
                             {
-                                row.Cells["dgvAmount"].Value = (txt_new_montant.Text).ToString();
-                                row.Cells["dgbTtl"].Value = decimal.Parse(row.Cells["dgvQt"].Value.ToString()) *
-                                                            decimal.Parse(row.Cells["dgvAmount"].Value.ToString());
-                                frmVente.GetTTL();
-                                frmVente.txtCount.Text = frmVente.getCount().ToString();
-                                frmVente.dataGridView1.CommitEdit(DataGridViewDataErrorContexts.Commit);
-                                frmVente.dataGridView1.Refresh();
-                                this.Close();
-                                return;
+                                var cellValue = row.Cells["رقم المنتوج"].Value;
+                                // Check if the cell value is not null before comparison
+                                if (cellValue != null && cellValue.ToString() == codebarre)
+                                {
+                                    row.Cells["سعر البيع"].Value = (txt_new_montant.Text).ToString();
+                                    row.Cells["السعر الكلي"].Value = decimal.Parse(row.Cells["كمية المنتوج"].Value.ToString()) *
+                                                                decimal.Parse(row.Cells["سعر البيع"].Value.ToString());
+                                    frm_edit_bon.GetTTL();
+                                    frm_edit_bon.txtCount.Text = frm_edit_bon.getCount().ToString();
+                                    frm_edit_bon.dataGridView1.CommitEdit(DataGridViewDataErrorContexts.Commit);
+                                    frm_edit_bon.dataGridView1.Refresh();
+                                    this.Close();
+                                    return;
+                                }
                             }
                         }
                     }
+                    else
+                    {
+                        foreach (DataGridViewRow row in frmVente.dataGridView1.Rows)
+                        {
+                            if (!row.IsNewRow)
+                            {
+                                var cellValue = row.Cells["DgvCodeBarre"].Value;
+                                // Check if the cell value is not null before comparison
+                                if (cellValue != null && cellValue.ToString() == codebarre)
+                                {
+                                    row.Cells["dgvAmount"].Value = (txt_new_montant.Text).ToString();
+                                    row.Cells["dgbTtl"].Value = decimal.Parse(row.Cells["dgvQt"].Value.ToString()) *
+                                                                decimal.Parse(row.Cells["dgvAmount"].Value.ToString());
+                                    frmVente.GetTTL();
+                                    frmVente.txtCount.Text = frmVente.getCount().ToString();
+                                    frmVente.dataGridView1.CommitEdit(DataGridViewDataErrorContexts.Commit);
+                                    frmVente.dataGridView1.Refresh();
+                                    this.Close();
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                        
                 }
             }
             else

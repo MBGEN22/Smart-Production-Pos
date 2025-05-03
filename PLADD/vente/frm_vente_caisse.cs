@@ -2,6 +2,7 @@
 using Smart_Production_Pos.BL;
 using Smart_Production_Pos.BL.BL_FICHIER;
 using Smart_Production_Pos.PL.Achat_revente;
+using Smart_Production_Pos.PL.vente;
 using Smart_Production_Pos.PLADD.Achat_revente;
 using Smart_Production_Pos.PLADD.Fichier;
 using Smart_Production_Pos.report;
@@ -27,6 +28,7 @@ namespace Smart_Production_Pos.PLADD.vente
 {
     public partial class frm_vente_caisse : Form
     {
+        BL.BL_vente.Bl_fctr_vente factureManager = new BL.BL_vente.Bl_fctr_vente();
         BL.BL_vente.BL_vente_Fonction classFacteure = new BL.BL_vente.BL_vente_Fonction();
         private bool isNewBarcodeEntry = true;
         BL.BL_COMBOBOX Bl_combobox = new BL.BL_COMBOBOX();
@@ -71,6 +73,8 @@ namespace Smart_Production_Pos.PLADD.vente
         // //////////////// 
         DataTable table = new DataTable();
         int rowIndex;
+        List<string> listeFactures = new List<string>();
+        int currentIndex = 0;
         BL.BL_vente.BL_class_vente classvente = new BL.BL_vente.BL_class_vente();
         public frm_vente_caisse()
         {
@@ -6080,6 +6084,29 @@ namespace Smart_Production_Pos.PLADD.vente
         {
             frm_add_produit_editable frm_add = new frm_add_produit_editable();
             frm_add.ShowDialog();
+        }
+        private void ChargerListeFactures()
+        {
+            listeFactures = factureManager.GetListeFacturesDesc(); 
+            if (listeFactures.Count > 0)
+            {
+                currentIndex = 0; 
+            }
+        }
+        private void kءءrypnButton16_Click(object sender, EventArgs e)
+        {
+            ChargerListeFactures();
+            if (currentIndex   < listeFactures.Count)
+            {
+                currentIndex++; 
+                frm_edit_bon edit = new frm_edit_bon();
+                edit.ID_bon = listeFactures[0];
+                edit.ShowDialog();
+            }
+            else
+            {
+                MessageBox.Show("وصلت لأول فاتورة.");
+            }
         }
     }
 }

@@ -19,11 +19,17 @@ namespace Smart_Production_Pos.PL.vente
 {
     public partial class frm_edit_bon : Form
     {
-
+        BL.BL_vente.Bl_fctr_vente factureManager = new BL.BL_vente.Bl_fctr_vente();
         BL.BL_vente.BL_FACTURE_VENTE class_facture_vente = new BL.BL_vente.BL_FACTURE_VENTE();
         BL.BL_vente.Bl_edit_bon class_edit_bon = new BL.BL_vente.Bl_edit_bon();
         BL.BL_CAISSE caisseVente_classe = new BL.BL_CAISSE();
         BL.BL_COMBOBOX Bl_combobox = new BL.BL_COMBOBOX();
+        BL.BL_vente.BL_DELETE_FCTR classDelete = new BL.BL_vente.BL_DELETE_FCTR();
+        BL.BL_vente.BL_vente_Fonction classVente = new BL.BL_vente.BL_vente_Fonction();
+        BL.Client_history_sold historique_Client = new BL.Client_history_sold();
+        BL.BL_vente.BL_SP_LOGINE_Caisse classCaisse = new BL.BL_vente.BL_SP_LOGINE_Caisse();
+        BL.BL_vente.bl_diminuer_la_Qt_vente classQt_vente = new BL.BL_vente.bl_diminuer_la_Qt_vente();
+        BL.BL_parametre.BL_paramtre_informatiion class_setting = new BL.BL_parametre.BL_paramtre_informatiion();
         Sp_Logine classLogine = new Sp_Logine();
         public string ID_bon; 
         public string barcode;
@@ -31,11 +37,16 @@ namespace Smart_Production_Pos.PL.vente
         public string reference;
         public decimal Price;
         public string pourcentageRemise;
+        public int ID_historique; 
+        public int ID_caissier;
         string barcodee;
         int list_vente;
         int facture_vente;
         public int id_user;
         Object price_Vente;
+        List<string> listeFactures = new List<string>();
+        int currentIndex = 0;
+        DataTable dt_list_vente = new DataTable();
         public frm_edit_bon()
         {
             InitializeComponent(); 
@@ -55,10 +66,24 @@ namespace Smart_Production_Pos.PL.vente
                 cmbProduct.ValueMember = "CodeBarre";
             } 
         }
+        private void ChargerListeFactures()
+        {
+            listeFactures = factureManager.GetListeFacturesDesc();
 
+            if (listeFactures.Count > 0)
+            {
+                currentIndex = 0;
+                txt_id_fctr.Text = listeFactures[currentIndex];
+            }
+        }
         private void frm_edit_bon_Load(object sender, EventArgs e)
         {
-            DataTable dt_info = class_edit_bon.get_information_bon(ID_bon);
+            ChargerListeFactures();
+            get_the_bon(ID_bon);
+        }
+        private void get_the_bon(string id_bn)
+        {
+            DataTable dt_info = class_edit_bon.get_information_bon(id_bn);
             object NMR_FACTURE = dt_info.Rows[0][0].ToString();
             object DATE = dt_info.Rows[0][1].ToString();
             object HEURE = dt_info.Rows[0][2].ToString();
@@ -80,7 +105,10 @@ namespace Smart_Production_Pos.PL.vente
             object tmbre = dt_info.Rows[0][18].ToString();
             object pricearabe = dt_info.Rows[0][19].ToString();
 
-
+            ID_caissier = Convert.ToInt32(ID_CAISSIER.ToString());
+            id_user = Convert.ToInt32(ID_USER.ToString());
+            lb_historique_credit.Text = OLD_SOLD.ToString();
+            lb_new_credit.Text = NEW_SOLD.ToString();
             pourcentageRemise = POURSENTAGE_REMISE.ToString();
             txtCount.Text = COUNT_ARTICLE.ToString();
             txt_id_fctr.Text = NMR_FACTURE.ToString();
@@ -92,7 +120,8 @@ namespace Smart_Production_Pos.PL.vente
             double price_org = double.Parse(TOTAL_FACURE_TTC.ToString()) + double.Parse(REMISE.ToString());
             lbl_price_off.Text = price_org.ToString();
 
-            dataGridView1.DataSource = class_edit_bon.get_vente_dtl(ID_bon);
+            dataGridView1.DataSource = class_edit_bon.get_vente_dtl(id_bn);
+            dt_list_vente = class_edit_bon.get_vente_dtl(id_bn);
             //dataGridView1.Columns["التكلفة"].Visible = false;
             //dataGridView1.Columns["النوع"].Visible = false;
             //dataGridView1.Columns["رقم المنتوج"].Visible = false;
@@ -131,18 +160,7 @@ namespace Smart_Production_Pos.PL.vente
                 DgvEditPrice.Visible = false;
                 dataGridView1.Columns.Add(DgvEditPrice);
             }
-
-            if (!dataGridView1.Columns.Contains("DgvPack"))
-            {
-                // عمود حزمة
-                DataGridViewImageColumn DgvPack = new DataGridViewImageColumn();
-                DgvPack.HeaderText = "حزمة";
-                DgvPack.Image = global::Smart_Production_Pos.Properties.Resources.logistics__2_;
-                DgvPack.Name = "DgvPack";
-                DgvPack.Width = 50;
-                dataGridView1.Columns.Add(DgvPack);
-            }
-
+             
             if (!dataGridView1.Columns.Contains("DgvREMISE"))
             {
                 // عمود خصم
@@ -156,10 +174,10 @@ namespace Smart_Production_Pos.PL.vente
 
             // إعادة ترتيب الأعمدة لتكون الأزرار في الأخير
             int lastIndex = dataGridView1.Columns.Count - 1;
-            dataGridView1.Columns["dgvEdit"].DisplayIndex = lastIndex - 4;
-            dataGridView1.Columns["dgvDellete"].DisplayIndex = lastIndex - 3;
-            dataGridView1.Columns["DgvREMISE"].DisplayIndex = lastIndex - 2;
-            dataGridView1.Columns["DgvPack"].DisplayIndex = lastIndex - 1;
+            dataGridView1.Columns["dgvEdit"].DisplayIndex = lastIndex - 3;
+            dataGridView1.Columns["dgvDellete"].DisplayIndex = lastIndex - 2;
+            dataGridView1.Columns["DgvREMISE"].DisplayIndex = lastIndex - 1;
+            //dataGridView1.Columns["DgvPack"].DisplayIndex = lastIndex - 1;
 
             select_last_rows();
         }
@@ -190,8 +208,330 @@ namespace Smart_Production_Pos.PL.vente
         }
         private void btn1_Click(object sender, EventArgs e)
         {
+            DataTable dt_facture = new DataTable();
+            dt_facture = classDelete.get_tb_fctr_vente(txt_id_fctr.Text);
+            object id_client = dt_facture.Rows[0][3];
+            object total_ttc = dt_facture.Rows[0][4];
+            object versement = dt_facture.Rows[0][8];
+             
+            //DELETE_HISTORIQUE
+            classDelete.DELETE_HISTORIQUE_CLIENT_BY_ID_FCTR(txt_id_fctr.Text, "سند جديد");
+            //DELETE_FACTURE_VENTE
+            classDelete.DELETE_FACTURE_VENTE(txt_id_fctr.Text);
 
+            foreach (DataRow row in dt_list_vente.Rows)
+            {
+                if (!string.IsNullOrWhiteSpace(row["رقم المنتوج"].ToString()))
+                {
+                    string produitId = row["رقم المنتوج"].ToString();
+                    float quantite = float.Parse(row["كمية المنتوج"].ToString());
+
+                    DataTable Dt_produit = caisseVente_classe.getSold_MAtier_revent(produitId);
+                    if (Dt_produit.Rows.Count > 0)
+                    {
+                        classDelete.rectefier_after_vente(produitId, quantite);
+                    }
+                    else
+                    {
+                        DataTable dt_pack = classDelete.get_pack_liee_with_product(produitId);
+                        if (dt_pack.Rows.Count > 0)
+                        {
+                            object codeBarre_produit = dt_pack.Rows[0][1];
+                            object qt_dans_pack = dt_pack.Rows[0][3];
+                            float Qt_ttl = float.Parse(qt_dans_pack.ToString()) * quantite;
+                            string code_pr = codeBarre_produit.ToString();
+                            classDelete.rectefier_after_vente(code_pr, Qt_ttl);
+                        }
+                    }
+                }
+            } 
+            classDelete.insert_hitorique(
+                $"قام المستخدم {id_user} بتعديل الفاتورة رقم {txt_id_fctr.Text}",
+                DateTime.Today,
+                DateTime.Now.TimeOfDay
+            );
+            reconfimre_bon();
         }
+
+        public  void reconfimre_bon()
+        {
+            DateTime currentDateTime = DateTime.Now;
+            Facture_terminer();
+            DeleteRowByCodeBarre();
+            dataGridView1.Refresh();
+            GetTTL();
+            txtCount.Text = getCount().ToString();
+            ChecK_And_print();  
+            this.Close();
+        }
+        public decimal SumColumn(DataGridView dataGridView, string columnName)
+        {
+            decimal sum = 0;
+
+            // Iterate through each row in the DataGridView
+            foreach (DataGridViewRow row in dataGridView.Rows)
+            {
+                if (row.Cells[columnName].Value != null && row.Cells[columnName].Value != DBNull.Value)
+                {
+                    // Try to parse the cell value to decimal and add to the sum
+                    if (decimal.TryParse(row.Cells[columnName].Value.ToString(), out decimal value))
+                    {
+                        sum += value;
+                    }
+                }
+            }
+
+            return sum;
+        }
+        public void Facture_terminer()
+        {
+            if (pourcentageRemise == null)
+            {
+                pourcentageRemise = "0";
+            }
+            decimal Sum_cout_ttl = SumColumn(dataGridView1, "التكلفة");
+            DateTime currentDateTime = DateTime.Now;
+            classVente.insertFacture(
+                        txt_id_fctr.Text,
+                        Convert.ToDateTime(dateTimetxt.Value),
+                        currentDateTime.TimeOfDay,
+                        Convert.ToInt32(clientCmb.SelectedValue),
+                        decimal.Parse(lb_Total.Text),
+                        decimal.Parse(lb_Total.Text),
+                        0,
+                        decimal.Parse(lb_historique_credit.Text),
+                        decimal.Parse(txt_Versement.Text),
+                        decimal.Parse(lb_new_credit.Text),
+                        decimal.Parse(lbl_prix_remisier.Text),
+                        float.Parse(pourcentageRemise),
+                        int.Parse(txtCount.Text),
+                        "",
+                        "فاتورة مكتملة",
+                        id_user,
+                        ID_caissier,
+                        Sum_cout_ttl
+                        );
+            classCaisse.update_history_caissier(
+                    ID_historique,
+                    currentDateTime.TimeOfDay,
+                    decimal.Parse(lb_Total.Text)
+                    );
+            historique_Client.insert_history_client(
+                        Convert.ToDateTime(dateTimetxt.Value),
+                        Convert.ToInt32(clientCmb.SelectedValue),
+                        decimal.Parse(lb_Total.Text),
+                        decimal.Parse(txt_Versement.Text),
+                        decimal.Parse(lb_historique_credit.Text),
+                        decimal.Parse(lb_new_credit.Text),
+                        "سند جديد",
+                        txt_id_fctr.Text
+                        );
+            historique_Client.edit_sold_client(
+                        Convert.ToInt32(clientCmb.SelectedValue),
+                        decimal.Parse(txt_Versement.Text),
+                        decimal.Parse(lb_new_credit.Text),
+                        decimal.Parse(lb_Total.Text)
+                        );
+            delte_qt_matier();
+            //insert list de vente
+            foreach (DataGridViewRow row in dataGridView1.Rows)
+            {
+                if (!row.IsNewRow)
+                {
+                    // Récupérez les valeurs nécessaires de la ligne actuelle du DataGridView
+                    string codeBarrePRoduit = row.Cells["رقم المنتوج"].Value.ToString();
+                    float Quantitevente = float.Parse(row.Cells["كمية المنتوج"].Value.ToString());
+                    decimal PrixVente = decimal.Parse(row.Cells["سعر البيع"].Value.ToString());
+                    decimal PrixTotal = decimal.Parse(row.Cells["السعر الكلي"].Value.ToString());
+                    decimal cout_ttl = decimal.Parse(row.Cells["التكلفة"].Value.ToString());
+                    string DgvType = row.Cells["النوع"].Value.ToString();
+
+                    string IdFacture = txt_id_fctr.Text;
+                    // Assurez-vous de remplacer "nouvelle_quantite" par le nom réel de la colonne
+                    classVente.InsertVente(
+                                              codeBarrePRoduit,
+                                              Quantitevente,
+                                              PrixVente,
+                                              PrixTotal,
+                                              IdFacture, cout_ttl, DgvType
+                                              );
+                    // Appelez la fonction prd2.Edit_Produit() pour mettre à jour le produit 
+                }
+            }
+        }
+        private void ChecK_And_print()
+        {
+            DataTable dt = new DataTable();
+            dt = class_setting.Get_paramater_tb();
+            object PRINT_FACTURE = dt.Rows[0][0]; ;
+            object PRINT_BON = dt.Rows[0][1]; ;
+            object PRINT_BON_A4 = dt.Rows[0][2]; ;
+            object DONT_PRINT = dt.Rows[0][3]; ;
+
+            string PRINT_FACTUREe = PRINT_FACTURE.ToString();
+            string PRINT_BONn = PRINT_BON.ToString();
+            string PRINT_BON_A44 = PRINT_BON_A4.ToString();
+            string DONT_PRINTt = DONT_PRINT.ToString();
+
+            if (PRINT_FACTUREe.ToString() == "true")
+            {
+                print_facture();
+
+            }
+            else if (PRINT_BONn.ToString() == "true")
+            {
+                print_bon();
+            }
+            else if (PRINT_BON_A44.ToString() == "true")
+            {
+                print_bon_A4();
+            }
+            else if (DONT_PRINTt.ToString() == "true")
+            {
+
+            }
+        }
+        private void print_facture()
+        {
+            report.vente.RP_fctr_vente rpt = new report.vente.RP_fctr_vente();
+            string mode = Properties.Settings.Default.mode;
+
+            if (mode == "SQL")
+            {
+                rpt.DataSourceConnections[0].IntegratedSecurity = false;
+                rpt.DataSourceConnections[0].SetConnection(
+                    Properties.Settings.Default.server,
+                    Properties.Settings.Default.dataBase,
+                    Properties.Settings.Default.ID,
+                    Properties.Settings.Default.PASS
+                );
+            }
+            else
+            {
+                rpt.DataSourceConnections[0].IntegratedSecurity = true;
+                rpt.DataSourceConnections[0].SetConnection(
+                    Properties.Settings.Default.server,
+                    Properties.Settings.Default.dataBase,
+                    true
+                );
+            }
+
+            rpt.Refresh();
+            rpt.SetParameterValue("@nmr_Facture", txt_id_fctr.Text);
+
+            // Print the report directly
+            rpt.PrintToPrinter(1, false, 0, 0);
+        }
+        private void print_bon_A4()
+        {
+            report.vente.bon_de_vente rpt = new report.vente.bon_de_vente();
+            string mode = Properties.Settings.Default.mode;
+
+            if (mode == "SQL")
+            {
+                rpt.DataSourceConnections[0].IntegratedSecurity = false;
+                rpt.DataSourceConnections[0].SetConnection(
+                    Properties.Settings.Default.server,
+                    Properties.Settings.Default.dataBase,
+                    Properties.Settings.Default.ID,
+                    Properties.Settings.Default.PASS
+                );
+            }
+            else
+            {
+                rpt.DataSourceConnections[0].IntegratedSecurity = true;
+                rpt.DataSourceConnections[0].SetConnection(
+                    Properties.Settings.Default.server,
+                    Properties.Settings.Default.dataBase,
+                    true
+                );
+            }
+
+            rpt.Refresh();
+            rpt.SetParameterValue("@nmr_Facture", txt_id_fctr.Text);
+
+            // Print the report directly
+            rpt.PrintToPrinter(1, false, 0, 0);
+        }
+        private void print_bon()
+        {
+            report.vente.direct_receipt rpt = new report.vente.direct_receipt();
+            string mode = Properties.Settings.Default.mode;
+
+            if (mode == "SQL")
+            {
+                rpt.DataSourceConnections[0].IntegratedSecurity = false;
+                rpt.DataSourceConnections[0].SetConnection(
+                    Properties.Settings.Default.server,
+                    Properties.Settings.Default.dataBase,
+                    Properties.Settings.Default.ID,
+                    Properties.Settings.Default.PASS
+                );
+            }
+            else
+            {
+                rpt.DataSourceConnections[0].IntegratedSecurity = true;
+                rpt.DataSourceConnections[0].SetConnection(
+                    Properties.Settings.Default.server,
+                    Properties.Settings.Default.dataBase,
+                    true
+                );
+            }
+            // تعيين حجم الورق والاتجاه
+            rpt.PrintOptions.PaperSize = CrystalDecisions.Shared.PaperSize.DefaultPaperSize;
+            rpt.PrintOptions.PaperOrientation = CrystalDecisions.Shared.PaperOrientation.Portrait;
+
+            rpt.SetParameterValue("@nmr_Facture", txt_id_fctr.Text);
+
+            // Print the report directly
+            rpt.PrintToPrinter(1, false, 0, 0);
+        }
+        public void delte_qt_matier()
+        {
+            foreach (DataGridViewRow row in dataGridView1.Rows)
+            {
+                if (!row.IsNewRow)
+                {
+                    // Récupérez les valeurs nécessaires de la ligne actuelle du DataGridView
+                    string idProduit = row.Cells["رقم المنتوج"].Value.ToString();
+                    DataTable Dt = new DataTable();
+                    Dt = caisseVente_classe.getSold_MAtier_revent(idProduit);
+                    if (Dt.Rows.Count > 0)
+                    {
+                        Object codeBarre = Dt.Rows[0][0];
+                        Object name_product = Dt.Rows[0][1];
+                        Object price_Vente = Dt.Rows[0][15];
+                        Object Quanite_dans_pack = Dt.Rows[0][24];
+                        Object price_achat_produit_revent = Dt.Rows[0][12];
+                        float quantite_vnt = float.Parse(row.Cells["كمية المنتوج"].Value.ToString()); // Assurez-vous de remplacer "nouvelle_quantite" par le nom réel de la colonne 
+                        classQt_vente.delete_Produit_revent(codeBarre.ToString(), quantite_vnt);
+
+                        //la fonction dellete
+                    }
+                    else
+                    {
+                        Dt = caisseVente_classe.select_pack_info(idProduit);
+                        if (Dt.Rows.Count > 0)
+                        {
+
+                            Object codeBarre = Dt.Rows[0][0];
+                            Object name_product = Dt.Rows[0][1];
+                            Object codeBarre_Produit = Dt.Rows[0][2];
+                            Object price_Vente = Dt.Rows[0][4];
+                            Object price_Achat = Dt.Rows[0][7];
+                            Object Qt_dans_pack = Dt.Rows[0][8];
+                            float quantite_vnt = float.Parse(row.Cells["كمية المنتوج"].Value.ToString()) *
+                                                                                float.Parse(Qt_dans_pack.ToString());
+                            // Appelez la fonction dellte produit apartire du pack
+                            classQt_vente.delete_Produit_revent(codeBarre_Produit.ToString(), quantite_vnt);
+
+                        }
+                    }
+
+                }
+            }
+        }
+
 
         private void BTN9_Click(object sender, EventArgs e)
         {
@@ -308,6 +648,33 @@ namespace Smart_Production_Pos.PL.vente
                     {
                         MessageBox.Show("يرجى تحديد المنتوج");
                     }
+                }
+                if (dataGridView1.Columns[e.ColumnIndex].Name == "dgvDellete")
+                {
+                    DeleteRowByCodeBarre(this.dataGridView1.CurrentRow.Cells["رقم المنتوج"].Value.ToString());
+                    dataGridView1.Refresh();
+                    GetTTL();
+                    txtCount.Text = getCount().ToString();
+                    if (dataGridView1.Rows.Count == 0)
+                    {
+                        LB_NAME.Text = string.Empty;
+                        LB_QT.Text = "00";
+                        LB_PRICE_U.Text = "00";
+                        LB_TTL.Text = "00";
+                    }
+                    return;
+                }
+                if (dataGridView1.Columns[e.ColumnIndex].Name == "DgvREMISE")
+                {
+                    frm_change_Price change_Price = new frm_change_Price();
+                    change_Price.codebarre = this.dataGridView1.CurrentRow.Cells["رقم المنتوج"].Value.ToString();
+                    change_Price.txt_price_product.Text = this.dataGridView1.CurrentRow.Cells["السعر الكلي"].Value.ToString();
+                    DataTable Dtt = caisseVente_classe.getSold_MAtier_revent(barcode);
+                    object price_Vente_min = Dtt.Rows[0][17];
+                    change_Price.price_min = decimal.Parse(price_Vente_min.ToString());
+                    change_Price.frm_edit_bon = this;
+                    change_Price.Typee = "edit";
+                    change_Price.ShowDialog();
                 }
             }
             catch
@@ -812,20 +1179,20 @@ namespace Smart_Production_Pos.PL.vente
                         {
                             if (!row.IsNewRow)
                             {
-                                var cellValue = row.Cells["DgvCodeBarre"].Value;
+                                var cellValue = row.Cells["رقم المنتوج"].Value;
 
                                 // Check if the cell value is not null before comparison
                                 if (cellValue != null && cellValue.ToString() == codeBarre.ToString())
                                 {
-                                    row.Cells["dgvQt"].Value = (float.Parse(row.Cells["dgvQt"].Value.ToString()) + float.Parse(QT)).ToString();
-                                    row.Cells["dgbTtl"].Value = float.Parse(row.Cells["dgvQt"].Value.ToString()) *
-                                                            float.Parse(row.Cells["dgvAmount"].Value.ToString());
-                                    row.Cells["cout_ttl"].Value = float.Parse(row.Cells["dgvQt"].Value.ToString()) *
+                                    row.Cells["كمية المنتوج"].Value = (float.Parse(row.Cells["كمية المنتوج"].Value.ToString()) + float.Parse(QT)).ToString();
+                                    row.Cells["السعر الكلي"].Value = float.Parse(row.Cells["كمية المنتوج"].Value.ToString()) *
+                                                            float.Parse(row.Cells["سعر البيع"].Value.ToString());
+                                    row.Cells["التكلفة"].Value = float.Parse(row.Cells["كمية المنتوج"].Value.ToString()) *
                                         float.Parse(price_achat_produit_revent.ToString());
                                     //------------------------------------------------------------------------------//
                                     if (Quanite_dans_pack.ToString() != "")
                                     {
-                                        if (float.Parse(row.Cells["dgvQt"].Value.ToString()) == float.Parse(Quanite_dans_pack.ToString()))
+                                        if (float.Parse(row.Cells["كمية المنتوج"].Value.ToString()) == float.Parse(Quanite_dans_pack.ToString()))
                                         {
                                             DialogResult dg = MessageBox.Show("هل تريد بيع حزمة من هذا المنتوج مباشرة؟", "بيع بالحزمة؟", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                                             if (dg == DialogResult.Yes)
@@ -843,15 +1210,15 @@ namespace Smart_Production_Pos.PL.vente
                                                 {
                                                     if (!row.IsNewRow)
                                                     {
-                                                        var cellValued = row.Cells["DgvCodeBarre"].Value;
+                                                        var cellValued = row.Cells["رقم المنتوج"].Value;
 
                                                         // Check if the cell value is not null before comparison
                                                         if (cellValued != null && cellValued.ToString() == codeBarrePack.ToString())
                                                         {
-                                                            row.Cells["dgvQt"].Value = (float.Parse(row.Cells["dgvQt"].Value.ToString()) + 1).ToString();
-                                                            row.Cells["dgbTtl"].Value = float.Parse(row.Cells["dgvQt"].Value.ToString()) *
-                                                                                    float.Parse(row.Cells["dgvAmount"].Value.ToString());
-                                                            row.Cells["cout_ttl"].Value = float.Parse(row.Cells["dgvQt"].Value.ToString()) *
+                                                            row.Cells["كمية المنتوج"].Value = (float.Parse(row.Cells["كمية المنتوج"].Value.ToString()) + 1).ToString();
+                                                            row.Cells["السعر الكلي"].Value = float.Parse(row.Cells["كمية المنتوج"].Value.ToString()) *
+                                                                                    float.Parse(row.Cells["سعر البيع"].Value.ToString());
+                                                            row.Cells["التكلفة"].Value = float.Parse(row.Cells["كمية المنتوج"].Value.ToString()) *
                                                                                     float.Parse(price_achat_revent_pack.ToString());
 
                                                             GetTTL();
@@ -945,15 +1312,15 @@ namespace Smart_Production_Pos.PL.vente
                                 {
                                     if (!row.IsNewRow)
                                     {
-                                        var cellValue = row.Cells["DgvCodeBarre"].Value;
+                                        var cellValue = row.Cells["رقم المنتوج"].Value;
 
                                         // Check if the cell value is not null before comparison
                                         if (cellValue != null && cellValue.ToString() == codeBarre.ToString())
                                         {
-                                            row.Cells["dgvQt"].Value = (int.Parse(row.Cells["dgvQt"].Value.ToString()) + 1).ToString();
-                                            row.Cells["dgbTtl"].Value = int.Parse(row.Cells["dgvQt"].Value.ToString()) *
-                                                                    decimal.Parse(row.Cells["dgvAmount"].Value.ToString());
-                                            row.Cells["cout_ttl"].Value = int.Parse(row.Cells["dgvQt"].Value.ToString()) *
+                                            row.Cells["كمية المنتوج"].Value = (int.Parse(row.Cells["كمية المنتوج"].Value.ToString()) + 1).ToString();
+                                            row.Cells["السعر الكلي"].Value = int.Parse(row.Cells["كمية المنتوج"].Value.ToString()) *
+                                                                    decimal.Parse(row.Cells["سعر البيع"].Value.ToString());
+                                            row.Cells["التكلفة"].Value = int.Parse(row.Cells["كمية المنتوج"].Value.ToString()) *
                                                 decimal.Parse(price_achat_produit_revent.ToString());
                                             GetTTL();
                                             txtCount.Text = getCount().ToString();
@@ -980,15 +1347,15 @@ namespace Smart_Production_Pos.PL.vente
                             {
                                 if (!row.IsNewRow)
                                 {
-                                    var cellValue = row.Cells["DgvCodeBarre"].Value;
+                                    var cellValue = row.Cells["رقم المنتوج"].Value;
 
                                     // Check if the cell value is not null before comparison
                                     if (cellValue != null && cellValue.ToString() == codeBarre.ToString())
                                     {
-                                        row.Cells["dgvQt"].Value = (int.Parse(row.Cells["dgvQt"].Value.ToString()) + 1).ToString();
-                                        row.Cells["dgbTtl"].Value = int.Parse(row.Cells["dgvQt"].Value.ToString()) *
-                                                                decimal.Parse(row.Cells["dgvAmount"].Value.ToString());
-                                        row.Cells["cout_ttl"].Value = int.Parse(row.Cells["dgvQt"].Value.ToString()) *
+                                        row.Cells["كمية المنتوج"].Value = (int.Parse(row.Cells["كمية المنتوج"].Value.ToString()) + 1).ToString();
+                                        row.Cells["السعر الكلي"].Value = int.Parse(row.Cells["كمية المنتوج"].Value.ToString()) *
+                                                                decimal.Parse(row.Cells["سعر البيع"].Value.ToString());
+                                        row.Cells["التكلفة"].Value = int.Parse(row.Cells["كمية المنتوج"].Value.ToString()) *
                                             decimal.Parse(price_achat_produit_revent.ToString());
                                         GetTTL();
                                         txtCount.Text = getCount().ToString();
@@ -999,16 +1366,19 @@ namespace Smart_Production_Pos.PL.vente
                                 }
                             }
                             check_date_periptition(date_pérétion);
-                            dataGridView1.Rows.Add(new object[] {
-                                0,
-                                codeBarre.ToString(),
-                                name_product.ToString(),
-                                txt_qt.Text ,
-                                price_Vente.ToString(),
-                                 (decimal.Parse(price_Vente.ToString())*(decimal.Parse(txt_qt.Text))),
-                                "U",
-                                 (decimal.Parse(price_achat_produit_revent.ToString())*(decimal.Parse(txt_qt.Text)))
-                                 });
+                             
+                            DataTable dt = (DataTable)dataGridView1.DataSource;
+
+                            DataRow newRow = dt.NewRow();
+                            newRow["رقم المنتوج"] = codeBarre.ToString();
+                            newRow["اسم المنتوج"] = name_product.ToString();
+                            newRow["كمية المنتوج"] = txt_qt.Text;
+                            newRow["سعر البيع"] = price_Vente.ToString();
+                            newRow["السعر الكلي"] = decimal.Parse(price_Vente.ToString()) * decimal.Parse(txt_qt.Text);
+                            newRow["التكلفة"] = (decimal.Parse(price_achat_produit_revent.ToString()) * (decimal.Parse(txt_qt.Text)));
+                            newRow["النوع"] = "U";
+
+                            dt.Rows.Add(newRow);
                             txt_barcode.Focus();
                             select_last_rows();
                         }
@@ -1021,15 +1391,15 @@ namespace Smart_Production_Pos.PL.vente
                         {
                             if (!row.IsNewRow)
                             {
-                                var cellValue = row.Cells["DgvCodeBarre"].Value;
+                                var cellValue = row.Cells["رقم المنتوج"].Value;
 
                                 // Check if the cell value is not null before comparison
                                 if (cellValue != null && cellValue.ToString() == codeBarre.ToString())
                                 {
-                                    row.Cells["dgvQt"].Value = (int.Parse(row.Cells["dgvQt"].Value.ToString()) + 1).ToString();
-                                    row.Cells["dgbTtl"].Value = int.Parse(row.Cells["dgvQt"].Value.ToString()) *
-                                                            decimal.Parse(row.Cells["dgvAmount"].Value.ToString());
-                                    row.Cells["cout_ttl"].Value = int.Parse(row.Cells["dgvQt"].Value.ToString()) *
+                                    row.Cells["كمية المنتوج"].Value = (int.Parse(row.Cells["كمية المنتوج"].Value.ToString()) + 1).ToString();
+                                    row.Cells["السعر الكلي"].Value = int.Parse(row.Cells["كمية المنتوج"].Value.ToString()) *
+                                                            decimal.Parse(row.Cells["سعر البيع"].Value.ToString());
+                                    row.Cells["التكلفة"].Value = int.Parse(row.Cells["كمية المنتوج"].Value.ToString()) *
                                         decimal.Parse(price_achat_produit_revent.ToString());
                                     GetTTL();
                                     txtCount.Text = getCount().ToString();
@@ -1040,16 +1410,18 @@ namespace Smart_Production_Pos.PL.vente
                             }
                         }
                         check_date_periptition(date_pérétion);
-                        dataGridView1.Rows.Add(new object[] {
-                            0,
-                            codeBarre.ToString(),
-                            name_product.ToString(),
-                            txt_qt.Text ,
-                            price_Vente.ToString(),
-                             (decimal.Parse(price_Vente.ToString())*(decimal.Parse(txt_qt.Text))),
-                            "U",
-                             (decimal.Parse(price_achat_produit_revent.ToString())*(decimal.Parse(txt_qt.Text)))
-                             });
+                        DataTable dt = (DataTable)dataGridView1.DataSource;
+
+                        DataRow newRow = dt.NewRow();
+                        newRow["رقم المنتوج"] = codeBarre.ToString();
+                        newRow["اسم المنتوج"] = name_product.ToString();
+                        newRow["كمية المنتوج"] = txt_qt.Text;
+                        newRow["سعر البيع"] = price_Vente.ToString();
+                        newRow["السعر الكلي"] = decimal.Parse(price_Vente.ToString()) * decimal.Parse(txt_qt.Text);
+                        newRow["التكلفة"] = (decimal.Parse(price_achat_produit_revent.ToString()) * (decimal.Parse(txt_qt.Text)));
+                        newRow["النوع"] = "U";
+
+                        dt.Rows.Add(newRow);
                         txt_barcode.Focus();
                         select_last_rows();
                     }
@@ -1068,19 +1440,19 @@ namespace Smart_Production_Pos.PL.vente
                         {
                             if (!row.IsNewRow)
                             {
-                                var cellValue = row.Cells["DgvCodeBarre"].Value;
+                                var cellValue = row.Cells["رقم المنتوج"].Value;
 
                                 // Check if the cell value is not null before comparison
                                 if (cellValue != null && cellValue.ToString() == codeBarre.ToString())
                                 {
-                                    row.Cells["dgvQt"].Value = (float.Parse(row.Cells["dgvQt"].Value.ToString()) + 1).ToString();
-                                    row.Cells["dgbTtl"].Value = float.Parse(row.Cells["dgvQt"].Value.ToString()) *
-                                                            float.Parse(row.Cells["dgvAmount"].Value.ToString());
-                                    row.Cells["cout_ttl"].Value = float.Parse(row.Cells["dgvQt"].Value.ToString()) *
+                                    row.Cells["كمية المنتوج"].Value = (float.Parse(row.Cells["كمية المنتوج"].Value.ToString()) + 1).ToString();
+                                    row.Cells["السعر الكلي"].Value = float.Parse(row.Cells["كمية المنتوج"].Value.ToString()) *
+                                                            float.Parse(row.Cells["سعر البيع"].Value.ToString());
+                                    row.Cells["التكلفة"].Value = float.Parse(row.Cells["كمية المنتوج"].Value.ToString()) *
                                                             float.Parse(cout_de_prodution.ToString());
                                     if (Quanite_dans_pack.ToString() != "")
                                     {
-                                        if (float.Parse(row.Cells["dgvQt"].Value.ToString()) == float.Parse(Quanite_dans_pack.ToString()))
+                                        if (float.Parse(row.Cells["كمية المنتوج"].Value.ToString()) == float.Parse(Quanite_dans_pack.ToString()))
                                         {
                                             DialogResult dg = MessageBox.Show("هل تريد بيع حزمة من هذا المنتوج مباشرة؟", "بيع بالحزمة؟", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                                             if (dg == DialogResult.Yes)
@@ -1098,15 +1470,15 @@ namespace Smart_Production_Pos.PL.vente
                                                 {
                                                     if (!row.IsNewRow)
                                                     {
-                                                        var cellValued = row.Cells["DgvCodeBarre"].Value;
+                                                        var cellValued = row.Cells["رقم المنتوج"].Value;
 
                                                         // Check if the cell value is not null before comparison
                                                         if (cellValued != null && cellValued.ToString() == codeBarrePack.ToString())
                                                         {
-                                                            row.Cells["dgvQt"].Value = (float.Parse(row.Cells["dgvQt"].Value.ToString()) + 1).ToString();
-                                                            row.Cells["dgbTtl"].Value = float.Parse(row.Cells["dgvQt"].Value.ToString()) *
-                                                                                    float.Parse(row.Cells["dgvAmount"].Value.ToString());
-                                                            row.Cells["cout_ttl"].Value = float.Parse(row.Cells["dgvQt"].Value.ToString()) *
+                                                            row.Cells["كمية المنتوج"].Value = (float.Parse(row.Cells["كمية المنتوج"].Value.ToString()) + 1).ToString();
+                                                            row.Cells["السعر الكلي"].Value = float.Parse(row.Cells["كمية المنتوج"].Value.ToString()) *
+                                                                                    float.Parse(row.Cells["سعر البيع"].Value.ToString());
+                                                            row.Cells["التكلفة"].Value = float.Parse(row.Cells["كمية المنتوج"].Value.ToString()) *
                                                                                     float.Parse(cout_produire_pack_favrique.ToString());
                                                             GetTTL();
                                                             txtCount.Text = getCount().ToString();
@@ -1161,15 +1533,15 @@ namespace Smart_Production_Pos.PL.vente
                             {
                                 if (!row.IsNewRow)
                                 {
-                                    var cellValue = row.Cells["DgvCodeBarre"].Value;
+                                    var cellValue = row.Cells["رقم المنتوج"].Value;
 
                                     // Check if the cell value is not null before comparison
                                     if (cellValue != null && cellValue.ToString() == codeBarre.ToString())
                                     {
-                                        row.Cells["dgvQt"].Value = (float.Parse(row.Cells["dgvQt"].Value.ToString()) + 1).ToString();
-                                        row.Cells["dgbTtl"].Value = float.Parse(row.Cells["dgvQt"].Value.ToString()) *
-                                                                float.Parse(row.Cells["dgvAmount"].Value.ToString());
-                                        row.Cells["cout_ttl"].Value = float.Parse(row.Cells["dgvQt"].Value.ToString()) *
+                                        row.Cells["كمية المنتوج"].Value = (float.Parse(row.Cells["كمية المنتوج"].Value.ToString()) + 1).ToString();
+                                        row.Cells["السعر الكلي"].Value = float.Parse(row.Cells["كمية المنتوج"].Value.ToString()) *
+                                                                float.Parse(row.Cells["سعر البيع"].Value.ToString());
+                                        row.Cells["التكلفة"].Value = float.Parse(row.Cells["كمية المنتوج"].Value.ToString()) *
                                                                 float.Parse(cout_produire_pack_favrique.ToString());
                                         GetTTL();
                                         txtCount.Text = getCount().ToString();
@@ -1183,17 +1555,20 @@ namespace Smart_Production_Pos.PL.vente
                             //this Line add new product
 
                             float ttl_vente_pack = float.Parse(price_Vente.ToString()) * float.Parse(txt_qt.Text);
-                            float ttl_cout_achat_pack = float.Parse(cout_produire_pack_favrique.ToString()) * float.Parse(txt_qt.Text);
+                            float ttl_cout_achat_pack = float.Parse(cout_produire_pack_favrique.ToString()) * float.Parse(txt_qt.Text); 
 
-                            dataGridView1.Rows.Add(new object[] {
-                                0,
-                                codeBarre.ToString(),
-                                name_product.ToString(),
-                                txt_qt.Text,
-                                price_Vente.ToString(),
-                                ttl_vente_pack.ToString(),
-                                "P",
-                                ttl_cout_achat_pack });
+                            DataTable dt = (DataTable)dataGridView1.DataSource;
+
+                            DataRow newRow = dt.NewRow();
+                            newRow["رقم المنتوج"] = codeBarre.ToString();
+                            newRow["اسم المنتوج"] = name_product.ToString();
+                            newRow["كمية المنتوج"] = txt_qt.Text;
+                            newRow["سعر البيع"] = price_Vente.ToString();
+                            newRow["السعر الكلي"] = ttl_vente_pack;
+                            newRow["التكلفة"] = ttl_cout_achat_pack;
+                            newRow["النوع"] = "P";
+
+                            dt.Rows.Add(newRow);
                             txt_qt.Text = "1";
                             txt_barcode.Focus();
                             select_last_rows();
@@ -1215,15 +1590,15 @@ namespace Smart_Production_Pos.PL.vente
                                 {
                                     if (!row.IsNewRow)
                                     {
-                                        var cellValue = row.Cells["DgvCodeBarre"].Value;
+                                        var cellValue = row.Cells["رقم المنتوج"].Value;
 
                                         // Check if the cell value is not null before comparison
                                         if (cellValue != null && cellValue.ToString() == codeBarre.ToString())
                                         {
-                                            row.Cells["dgvQt"].Value = (float.Parse(row.Cells["dgvQt"].Value.ToString()) + 1).ToString();
-                                            row.Cells["dgbTtl"].Value = float.Parse(row.Cells["dgvQt"].Value.ToString()) *
-                                                                    float.Parse(row.Cells["dgvAmount"].Value.ToString());
-                                            row.Cells["cout_ttl"].Value = float.Parse(row.Cells["dgvQt"].Value.ToString()) *
+                                            row.Cells["كمية المنتوج"].Value = (float.Parse(row.Cells["كمية المنتوج"].Value.ToString()) + 1).ToString();
+                                            row.Cells["السعر الكلي"].Value = float.Parse(row.Cells["كمية المنتوج"].Value.ToString()) *
+                                                                    float.Parse(row.Cells["سعر البيع"].Value.ToString());
+                                            row.Cells["التكلفة"].Value = float.Parse(row.Cells["كمية المنتوج"].Value.ToString()) *
                                                                     float.Parse(cout_produire_pack_favrique.ToString());
                                             GetTTL();
                                             txtCount.Text = getCount().ToString();
@@ -1287,15 +1662,15 @@ namespace Smart_Production_Pos.PL.vente
                                         {
                                             if (!row.IsNewRow)
                                             {
-                                                var cellValue = row.Cells["DgvCodeBarre"].Value;
+                                                var cellValue = row.Cells["رقم المنتوج"].Value;
 
                                                 // Check if the cell value is not null before comparison
                                                 if (cellValue != null && cellValue.ToString() == codeBarre.ToString())
                                                 {
-                                                    row.Cells["dgvQt"].Value = (float.Parse(row.Cells["dgvQt"].Value.ToString()) + 1).ToString();
-                                                    row.Cells["dgbTtl"].Value = float.Parse(row.Cells["dgvQt"].Value.ToString()) *
-                                                                                        float.Parse(row.Cells["dgvAmount"].Value.ToString());
-                                                    row.Cells["cout_ttl"].Value = float.Parse(row.Cells["dgvQt"].Value.ToString()) *
+                                                    row.Cells["كمية المنتوج"].Value = (float.Parse(row.Cells["كمية المنتوج"].Value.ToString()) + 1).ToString();
+                                                    row.Cells["السعر الكلي"].Value = float.Parse(row.Cells["كمية المنتوج"].Value.ToString()) *
+                                                                                        float.Parse(row.Cells["سعر البيع"].Value.ToString());
+                                                    row.Cells["التكلفة"].Value = float.Parse(row.Cells["كمية المنتوج"].Value.ToString()) *
                                                                 float.Parse(price_achat_produit_revent.ToString());
                                                     GetTTL();
                                                     txtCount.Text = getCount().ToString();
@@ -1311,16 +1686,19 @@ namespace Smart_Production_Pos.PL.vente
                                         float ttl_vente_packkk = float.Parse(price_Vente.ToString()) * float.Parse(txt_qt.Text);
                                         float ttl_cout_achat_packk = float.Parse(price_achat_produit_revent.ToString()) * float.Parse(txt_qt.Text);
 
-                                        check_date_periptition(date_pérétion);
-                                        dataGridView1.Rows.Add(new object[] {
-                                        0,
-                                        codeBarreR.ToString(),
-                                        name_productT.ToString(),
-                                        txt_qt.Text,
-                                        price_Vente.ToString(),
-                                        ttl_vente_packkk.ToString(),
-                                        "U",
-                                        ttl_cout_achat_packk.ToString()});
+                                        check_date_periptition(date_pérétion); 
+                                        DataTable dt = (DataTable)dataGridView1.DataSource;
+
+                                        DataRow newRow = dt.NewRow();
+                                        newRow["رقم المنتوج"] = codeBarre.ToString();
+                                        newRow["اسم المنتوج"] = name_product.ToString();
+                                        newRow["كمية المنتوج"] = txt_qt.Text;
+                                        newRow["سعر البيع"] = price_Vente.ToString();
+                                        newRow["السعر الكلي"] = ttl_vente_packkk.ToString();
+                                        newRow["التكلفة"] = ttl_cout_achat_packk.ToString();
+                                        newRow["النوع"] = "U";
+
+                                        dt.Rows.Add(newRow);
                                     }
                                     txt_qt.Text = "1";
                                     txt_barcode.Focus();
@@ -1352,15 +1730,15 @@ namespace Smart_Production_Pos.PL.vente
                                             {
                                                 if (!row.IsNewRow)
                                                 {
-                                                    var cellValue = row.Cells["DgvCodeBarre"].Value;
+                                                    var cellValue = row.Cells["رقم المنتوج"].Value;
 
                                                     // Check if the cell value is not null before comparison
                                                     if (cellValue != null && cellValue.ToString() == codeBarre.ToString())
                                                     {
-                                                        row.Cells["dgvQt"].Value = (float.Parse(row.Cells["dgvQt"].Value.ToString()) + 1).ToString();
-                                                        row.Cells["dgbTtl"].Value = float.Parse(row.Cells["dgvQt"].Value.ToString()) *
-                                                                                float.Parse(row.Cells["dgvAmount"].Value.ToString());
-                                                        row.Cells["cout_ttl"].Value = float.Parse(row.Cells["dgvQt"].Value.ToString()) *
+                                                        row.Cells["كمية المنتوج"].Value = (float.Parse(row.Cells["كمية المنتوج"].Value.ToString()) + 1).ToString();
+                                                        row.Cells["السعر الكلي"].Value = float.Parse(row.Cells["كمية المنتوج"].Value.ToString()) *
+                                                                                float.Parse(row.Cells["سعر البيع"].Value.ToString());
+                                                        row.Cells["التكلفة"].Value = float.Parse(row.Cells["كمية المنتوج"].Value.ToString()) *
                                                                                 float.Parse(cout_produire_pack_favrique.ToString());
                                                         GetTTL();
                                                         txtCount.Text = getCount().ToString();
@@ -1385,6 +1763,19 @@ namespace Smart_Production_Pos.PL.vente
                                             ttl_vente_pack.ToString(),
                                             "P",
                                             ttl_cout_achat_pack });
+                                            DataTable dt = (DataTable)dataGridView1.DataSource;
+
+                                            DataRow newRow = dt.NewRow();
+                                            newRow["رقم المنتوج"] = codeBarre.ToString();
+                                            newRow["اسم المنتوج"] = name_product.ToString();
+                                            newRow["كمية المنتوج"] = txt_qt.Text;
+                                            newRow["سعر البيع"] = price_Vente.ToString();
+                                            newRow["السعر الكلي"] = ttl_vente_pack.ToString();
+                                            newRow["التكلفة"] = ttl_cout_achat_pack;
+                                            newRow["النوع"] = "P";
+
+                                            dt.Rows.Add(newRow);
+
                                             txt_qt.Text = "1";
                                             txt_barcode.Focus();
                                             select_last_rows();
@@ -1422,5 +1813,136 @@ namespace Smart_Production_Pos.PL.vente
             select_last_rows();
         }
 
+        private void BTN3_Click(object sender, EventArgs e)
+        {
+            if (MessageBox.Show("هذا الخيار سيقوم بحذف  كل البيانات", "عملية الحذف  ", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            {
+                if (dataGridView1.Rows.Count > 0)
+                {
+                    
+                        DeleteRowByCodeBarre();
+                        dataGridView1.Refresh();
+                        GetTTL();
+                        txtCount.Text = getCount().ToString();
+                        if (dataGridView1.Rows.Count == 0)
+                        {
+                            LB_NAME.Text = string.Empty;
+                            LB_QT.Text = "00";
+                            LB_PRICE_U.Text = "00";
+                            LB_TTL.Text = "00";
+                        }  
+                        return; 
+                }
+                else
+                {
+                    MessageBox.Show("الجدول فارغ");
+                }
+
+            }
+            txt_barcode.Focus();
+        }
+        public void DeleteRowByCodeBarre()
+        {
+            foreach (DataGridViewRow row in dataGridView1.Rows)
+            {
+                dataGridView1.DataSource = null; // أولًا فك الربط
+                dataGridView1.Rows.Clear();      // ثم امسح الصفوف
+            }
+        }
+
+        private void BTN2_Click(object sender, EventArgs e)
+        {
+            if (dataGridView1.Rows.Count > 0)
+            { 
+                DeleteRowByCodeBarre(this.dataGridView1.CurrentRow.Cells["رقم المنتوج"].Value.ToString());
+                dataGridView1.Refresh();
+                GetTTL();
+                txtCount.Text = getCount().ToString();
+                if (dataGridView1.Rows.Count == 0)
+                {
+                    LB_NAME.Text = string.Empty;
+                    LB_QT.Text = "00";
+                    LB_PRICE_U.Text = "00";
+                    LB_TTL.Text = "00";
+                }
+                return; 
+            }
+            else
+            {
+                MessageBox.Show("لاتوجد منتوجات  لحذفها ");
+            }
+        }
+
+        private void DeleteRowByCodeBarre(string codeBarre)
+        {
+            foreach (DataGridViewRow row in dataGridView1.Rows)
+            {
+                if (row.Cells["رقم المنتوج"].Value != null &&
+                    row.Cells["رقم المنتوج"].Value.ToString() == codeBarre)
+                {
+                    dataGridView1.Rows.Remove(row);
+                    break; // Exit the loop after removing the row
+                }
+            }
+        }
+
+        private void txt_Versement_TextChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                lb_rest.Text = calculeRest(decimal.Parse(lb_Total.Text), decimal.Parse(txt_Versement.Text)).ToString();
+
+                decimal sold_non_pays = decimal.Parse(lb_historique_credit.Text);
+                //calcule_credit_after(decimal.Parse(sold_non_pays.ToString()));
+                lb_new_credit.Text = calcule_credit_after(decimal.Parse(sold_non_pays.ToString())).ToString();
+
+                if (decimal.Parse(lb_rest.Text) < 0)
+                {
+                    lb_rest.ForeColor = Color.Green;
+                }
+                else if (decimal.Parse(lb_rest.Text) > 0)
+                {
+                    lb_rest.ForeColor = Color.Red;
+                }
+            }
+            catch
+            {
+
+            }
+        }
+        public decimal calcule_credit_after(decimal sold_old)
+        {
+            decimal sold_after = decimal.Parse(lb_rest.Text);
+            decimal soldnew = sold_old + sold_after;
+            return soldnew;
+        }
+
+        private void kryptonButton4_Click(object sender, EventArgs e)
+        {
+            if (currentIndex + 1 < listeFactures.Count)
+            {
+                currentIndex++;
+                txt_id_fctr.Text = listeFactures[currentIndex];
+                get_the_bon(txt_id_fctr.Text);
+            }
+            else
+            {
+                MessageBox.Show("وصلت لأول فاتورة.");
+            }
+        }
+
+        private void kryptonButton6_Click(object sender, EventArgs e)
+        {
+            if (currentIndex > 0)
+            {
+                currentIndex--;
+                txt_id_fctr.Text = listeFactures[currentIndex];
+                get_the_bon(txt_id_fctr.Text);                
+            }
+            else
+            {
+                MessageBox.Show("وصلت لاخر فاتورة.");
+            }
+        }
     }
 }

@@ -348,6 +348,7 @@
     <Compile Include="BL\BL_vente\bl_diminuer_la_Qt_vente.cs" />
     <Compile Include="BL\BL_vente\Bl_edit_bon.cs" />
     <Compile Include="BL\BL_vente\BL_FACTURE_VENTE.cs" />
+    <Compile Include="BL\BL_vente\Bl_fctr_vente.cs" />
     <Compile Include="BL\BL_vente\BL_livraison.cs" />
     <Compile Include="BL\BL_vente\BL_SP_LOGINE_Caisse.cs" />
     <Compile Include="BL\BL_vente\BL_vente_Fonction.cs" />
@@ -2721,6 +2722,7 @@
     <None Include="Resources\1.png" />
     <None Include="Resources\electricite.png" />
     <None Include="Resources\screwdriver.png" />
+    <None Include="Resources\dossier1.png" />
     <Content Include="sas.ico" />
     <Content Include="sasCOUPER.ico" />
     <Content Include="Untitled design %281%29.ico" />

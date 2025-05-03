@@ -23,7 +23,7 @@ namespace Smart_Production_Pos.BL.BL_vente
         }
 
         DAL.DAL daoo;
-        public void DELETE_HISTORIQUE_CLIENT_BY_ID_FCTR( string ID_FACTURE)
+        public void DELETE_HISTORIQUE_CLIENT_BY_ID_FCTR( string ID_FACTURE, string remarque)
         {
             daoo = new DAL.DAL();
             using (daoo.sqlConnection)
@@ -34,6 +34,7 @@ namespace Smart_Production_Pos.BL.BL_vente
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.Parameters.Add("@ID_FACTURE", SqlDbType.NVarChar).Value = ID_FACTURE;
+                    cmd.Parameters.Add("@remarque", SqlDbType.NVarChar).Value = remarque;
                     cmd.ExecuteNonQuery();
                 }
             }
