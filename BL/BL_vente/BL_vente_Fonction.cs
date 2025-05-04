@@ -82,18 +82,19 @@ namespace Smart_Production_Pos.BL.BL_vente
 
 			using (DAaL.sqlConnection)
 			{
-				string query = @" SELECT CONCAT('FV', 
-						  FORMAT(
-							ISNULL(
-								CONVERT(INT, 
-									MAX(CASE 
-										WHEN ISNUMERIC(SUBSTRING(NMR_FACTURE, 3, LEN(NMR_FACTURE))) = 1 
-										THEN SUBSTRING(NMR_FACTURE, 3, LEN(NMR_FACTURE)) 
-										ELSE '0' 
-									END)) + 1, 0
-							), '0000')
-									) 
-							FROM TB_FACTURE_VENTE;";
+				string query = @" SELECT 'FV' + 
+					   CAST(
+						   ISNULL(
+							   MAX(CASE 
+									   WHEN ISNUMERIC(SUBSTRING(NMR_FACTURE, 3, LEN(NMR_FACTURE))) = 1 
+									   THEN CONVERT(BIGINT, SUBSTRING(NMR_FACTURE, 3, LEN(NMR_FACTURE))) 
+									   ELSE 0 
+								   END), 
+							   0
+						   ) + 1 AS VARCHAR
+					   ) 
+				FROM TB_FACTURE_VENTE;
+				";
 
                 using (SqlCommand command = new SqlCommand(query, DAaL.sqlConnection))
 				{
